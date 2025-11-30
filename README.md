@@ -39,34 +39,31 @@ npm run serve
 
 ## 🌐 Deploying to GitHub Pages
 
-1. Build the project:
-   ```bash
-   npm run build
-   ```
-2. Push the contents of `dist/` to the `gh-pages` branch, or configure GitHub Actions to do it automatically.
-3. In the repo settings, set **Pages** source to `gh-pages` branch, root folder.
+This repo already contains `.github/workflows/deploy.yml`, so every push to `main` will:
 
-Alternatively, add a workflow file (`.github/workflows/deploy.yml`) using `peaceiris/actions-gh-pages`:
+1. Install dependencies with Node 20.
+2. Run `npm run build` with the Vite `base` set to `/PDF-Manipulator/`.
+3. Publish the contents of `dist/` to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
 
-```yaml
-name: Deploy
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci && npm run build
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+After the first successful workflow run, open **Settings → Pages** and choose `gh-pages` as the branch with the root (`/`) folder. GitHub Pages will then serve the SPA at `https://aqsama.github.io/PDF-Manipulator/`.
+
+### Manual trigger / first deployment
+
+If you need to publish manually (for example before the first `main` push):
+
+```bash
+npm install
+npm run build
+git worktree add gh-pages
+cp -r dist/* gh-pages/
+cd gh-pages
+git add .
+git commit -m "Deploy"
+git push origin gh-pages
+git worktree remove gh-pages
 ```
+
+Then configure Pages as described above. Future changes only require pushing to `main`; the workflow takes care of building and deploying.
 
 ## 📄 License
 
