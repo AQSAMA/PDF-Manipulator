@@ -1,0 +1,37 @@
+{
+  "name": "pdf-manipulator-spa",
+  "version": "1.0.0",
+  "description": "A single-page application for manipulating PDF files, allowing users to upload, rotate, and modify borders.",
+  "main": "src/main.tsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.0",
+    "vite": "^2.6.0",
+    "@vitejs/plugin-react": "^1.0.0"
+  },
+  "keywords": [
+    "pdf",
+    "manipulation",
+    "react",
+    "spa"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/pdf-manipulator-spa",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/pdf-manipulator-spa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/pdf-manipulator-spa/issues"
+  }
+}
