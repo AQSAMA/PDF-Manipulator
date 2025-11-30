@@ -9,7 +9,6 @@ const DEFAULT_SETTINGS: PdfSettings = {
     pagesPerSheet: 1,
     rotation: 0,
     borderWidth: 0,
-    borderColor: '#111827',
 };
 
 const App: React.FC = () => {
@@ -64,7 +63,7 @@ const App: React.FC = () => {
                     <p className="eyebrow">PDF toolkit</p>
                     <h1>High-performance PDF sheet composer</h1>
                     <p className="lede">
-                        Upload a PDF, tweak sheet layouts, rotate orientation, and dial-in printable borders. Optimized for desktop and mobile,
+                        Upload a PDF, tweak sheet layouts, rotate orientation, and add printable borders. Optimized for desktop and mobile,
                         deployable anywhere including GitHub Pages.
                     </p>
                 </div>
@@ -89,9 +88,7 @@ const App: React.FC = () => {
 
                     <BorderControls
                         borderWidth={settings.borderWidth}
-                        borderColor={settings.borderColor}
                         onBorderWidthChange={(value) => setSettings((prev) => ({ ...prev, borderWidth: value }))}
-                        onBorderColorChange={(color) => setSettings((prev) => ({ ...prev, borderColor: color }))}
                     />
 
                     <div className="action-row">

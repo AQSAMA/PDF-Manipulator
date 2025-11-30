@@ -1,67 +1,73 @@
 # PDF Manipulator SPA
 
-## Overview
-PDF Manipulator SPA is a single-page application designed for manipulating PDF files. Users can upload PDF documents, change the number of pages per sheet for printing, rotate pages, and modify borders. The application is optimized for high performance on both desktop and mobile devices and is suitable for hosting on GitHub Pages.
+A fast, lightweight single-page app for manipulating PDF files **entirely in the browser**. Upload a PDF, tweak page layouts, rotate, add borders, and download the result—no server uploads, everything runs client-side via Web Workers.
 
-## Features
-- Upload PDF files for manipulation.
-- Change the number of pages per sheet for printing.
-- Rotate individual pages.
-- Modify borders of the PDF pages.
-- Real-time preview of changes.
+## ✨ Features
 
-## Technologies Used
-- React: A JavaScript library for building user interfaces.
-- TypeScript: A typed superset of JavaScript that compiles to plain JavaScript.
-- Vite: A fast build tool and development server.
-- CSS: For styling the application.
+- **Upload** — drag-and-drop or file picker (PDF only).
+- **Pages per sheet** — print multiple logical pages on one physical sheet (1, 2, 4, 6, or 8-up).
+- **Rotation** — rotate content 0°, 90°, 180°, or 270°.
+- **Borders** — add a visible border around each tile with customizable width and color.
+- **Live preview** — see changes instantly before downloading.
+- **Mobile-first responsive layout** — works smoothly on phones, tablets, and desktops.
+- **GitHub Pages ready** — static build, no backend.
 
-## Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
-- Node.js (version 14 or higher)
-- npm (Node package manager)
+```bash
+# Install dependencies
+npm install
 
-### Installation
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/pdf-manipulator-spa.git
-   ```
-2. Navigate to the project directory:
-   ```
-   cd pdf-manipulator-spa
-   ```
-3. Install the dependencies:
-   ```
-   npm install
-   ```
-
-### Running the Application
-To start the development server, run:
-```
+# Start dev server (http://localhost:3000)
 npm run dev
-```
-Open your browser and navigate to `http://localhost:3000` to view the application.
 
-### Building for Production
-To build the application for production, run:
-```
+# Production build → dist/
 npm run build
+
+# Preview production build locally
+npm run serve
 ```
-The built files will be available in the `dist` directory.
 
-### Hosting on GitHub Pages
-1. Build the application as mentioned above.
-2. Deploy the contents of the `dist` directory to your GitHub Pages branch (usually `gh-pages`).
+## 📦 Tech Stack
 
-## Usage
-1. Upload a PDF file using the uploader component.
-2. Use the border controls to adjust the borders of the pages.
-3. Specify the number of pages per sheet and rotate pages as needed.
-4. Preview the changes in real-time before finalizing.
+| Layer | Tool |
+|-------|------|
+| UI | React 18 + TypeScript |
+| Bundler | Vite |
+| PDF processing | pdf-lib (runs in a Web Worker) |
+| Styling | Vanilla CSS (CSS variables, responsive grid) |
 
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
+## 🌐 Deploying to GitHub Pages
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+1. Build the project:
+   ```bash
+   npm run build
+   ```
+2. Push the contents of `dist/` to the `gh-pages` branch, or configure GitHub Actions to do it automatically.
+3. In the repo settings, set **Pages** source to `gh-pages` branch, root folder.
+
+Alternatively, add a workflow file (`.github/workflows/deploy.yml`) using `peaceiris/actions-gh-pages`:
+
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci && npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+```
+
+## 📄 License
+
+MIT

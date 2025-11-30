@@ -2,12 +2,10 @@ import React from 'react';
 
 interface BorderControlsProps {
     borderWidth: number;
-    borderColor: string;
     onBorderWidthChange: (value: number) => void;
-    onBorderColorChange: (value: string) => void;
 }
 
-const BorderControls: React.FC<BorderControlsProps> = ({ borderWidth, borderColor, onBorderWidthChange, onBorderColorChange }) => {
+const BorderControls: React.FC<BorderControlsProps> = ({ borderWidth, onBorderWidthChange }) => {
     return (
         <section className="panel">
             <header className="panel__header">
@@ -27,11 +25,6 @@ const BorderControls: React.FC<BorderControlsProps> = ({ borderWidth, borderColo
                         onChange={(event) => onBorderWidthChange(parseInt(event.target.value, 10))}
                     />
                     <span className="range-value">{borderWidth} pt</span>
-                </label>
-
-                <label className="form-field color">
-                    <span>Border color</span>
-                    <input type="color" value={borderColor} onChange={(event) => onBorderColorChange(event.target.value)} />
                 </label>
             </div>
         </section>
