@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PdfUploader from './components/PdfUploader';
 import SheetSettings from './components/SheetSettings';
 import BorderControls from './components/BorderControls';
@@ -14,63 +14,84 @@ const DEFAULT_SETTINGS: PdfSettings = {
 
 const App: React.FC = () => {
     const [settings, setSettings] = useState<PdfSettings>(DEFAULT_SETTINGS);
-    const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
-    const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
-    const { processPdf, previewUrl, downloadBlob, status, error, reset } = usePdfWorker();
+    const { 
+        files, 
+        activeFile, 
+        activeFileId, 
+        setActiveFileId, 
+        addFiles, 
+        removeFile, 
+        processAllFiles, 
+        status, 
+        reset 
+    } = usePdfWorker();
+    
+    const isFirstRender = useRef(true);
 
-    const handleFileUpload = useCallback(async (file: File) => {
-        const buffer = await file.arrayBuffer();
-        setFileBuffer(buffer);
-        setFileMeta({ name: file.name, size: file.size });
-    }, []);
+    const handleFilesUpload = useCallback(async (uploadedFiles: File[]) => {
+        const filesWithBuffers = await Promise.all(
+            uploadedFiles.map(async (file) => ({
+                file,
+                buffer: await file.arrayBuffer(),
+            }))
+        );
+        addFiles(filesWithBuffers, settings);
+    }, [addFiles, settings]);
 
+    // Re-process all files only when settings change (not on first render or file changes)
     useEffect(() => {
-        if (!fileBuffer) {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
             return;
         }
-        processPdf(fileBuffer, settings);
-    }, [fileBuffer, settings, processPdf]);
-
-    const formattedFileSize = useMemo(() => {
-        if (!fileMeta) return null;
-        const kb = fileMeta.size / 1024;
-        if (kb < 1024) {
-            return `${kb.toFixed(1)} KB`;
-        }
-        return `${(kb / 1024).toFixed(2)} MB`;
-    }, [fileMeta]);
+        if (files.length === 0) return;
+        processAllFiles(settings);
+    }, [settings]); // Only depend on settings, not files or processAllFiles
 
     const handleDownload = () => {
-        if (!downloadBlob || !fileMeta) return;
-        const url = URL.createObjectURL(downloadBlob);
+        if (!activeFile?.blob) return;
+        const url = URL.createObjectURL(activeFile.blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${fileMeta.name.replace(/\.pdf$/i, '')}-manipulated.pdf`;
+        link.download = `${activeFile.name.replace(/\.pdf$/i, '')}-manipulated.pdf`;
         link.click();
         URL.revokeObjectURL(url);
     };
 
+    const handleDownloadAll = () => {
+        files.forEach((file) => {
+            if (file.blob) {
+                const url = URL.createObjectURL(file.blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${file.name.replace(/\.pdf$/i, '')}-manipulated.pdf`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+        });
+    };
+
     const handleReset = () => {
-        setFileBuffer(null);
-        setFileMeta(null);
         setSettings(DEFAULT_SETTINGS);
         reset();
     };
 
+    const readyFilesCount = files.filter(f => f.status === 'ready').length;
+
     return (
         <div className="app-shell">
             <header className="app-header">
-                <div>
+                <div className="app-header__content">
                     <p className="eyebrow">PDF toolkit</p>
                     <h1>High-performance PDF sheet composer</h1>
                     <p className="lede">
-                        Upload a PDF, tweak sheet layouts, rotate orientation, and add printable borders. Optimized for desktop and mobile,
-                        deployable anywhere including GitHub Pages.
+                        Upload PDFs, tweak sheet layouts, rotate orientation, and add printable borders. 
+                        Supports multiple files. All processing happens in your browser.
                     </p>
                 </div>
                 <div className="status-pill" data-status={status}>
                     {status === 'processing' && 'Processing…'}
-                    {status === 'ready' && 'Preview ready'}
+                    {status === 'ready' && `${readyFilesCount} file${readyFilesCount !== 1 ? 's' : ''} ready`}
                     {status === 'idle' && 'Awaiting upload'}
                     {status === 'error' && 'Something went wrong'}
                 </div>
@@ -78,7 +99,13 @@ const App: React.FC = () => {
 
             <main className="layout">
                 <section className="panel stack">
-                    <PdfUploader onFileUpload={handleFileUpload} fileName={fileMeta?.name} fileSize={formattedFileSize} />
+                    <PdfUploader 
+                        onFilesUpload={handleFilesUpload} 
+                        files={files}
+                        activeFileId={activeFileId}
+                        onFileSelect={setActiveFileId}
+                        onFileRemove={removeFile}
+                    />
 
                     <SheetSettings
                         pagesPerSheet={settings.pagesPerSheet}
@@ -95,23 +122,35 @@ const App: React.FC = () => {
                     />
 
                     <div className="action-row">
-                        <button className="button primary" onClick={handleDownload} disabled={!downloadBlob || status === 'processing'}>
-                            Download PDF
+                        <button 
+                            className="button primary" 
+                            onClick={handleDownload} 
+                            disabled={!activeFile?.blob || status === 'processing'}
+                        >
+                            Download Current
                         </button>
-                        <button className="button ghost" onClick={handleReset} disabled={!fileMeta}>
+                        {files.length > 1 && (
+                            <button 
+                                className="button secondary" 
+                                onClick={handleDownloadAll} 
+                                disabled={readyFilesCount === 0 || status === 'processing'}
+                            >
+                                Download All ({readyFilesCount})
+                            </button>
+                        )}
+                        <button className="button ghost" onClick={handleReset} disabled={files.length === 0}>
                             Reset
                         </button>
                     </div>
-
-                    {error && <p className="error-text">{error}</p>}
                 </section>
 
                 <section className="preview-panel">
                     <PagePreview
-                        previewUrl={previewUrl}
-                        isProcessing={status === 'processing'}
-                        hasFile={Boolean(fileMeta)}
-                        fileName={fileMeta?.name}
+                        files={files}
+                        activeFile={activeFile}
+                        activeFileId={activeFileId}
+                        onFileSelect={setActiveFileId}
+                        overallStatus={status}
                     />
                 </section>
             </main>

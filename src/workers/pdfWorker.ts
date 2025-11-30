@@ -206,14 +206,14 @@ async function processDocument(buffer: ArrayBuffer, settings: PdfSettings): Prom
   return outDoc.save();
 }
 
-self.onmessage = async (event: MessageEvent<{ type: string; payload: { buffer: ArrayBuffer; settings: PdfSettings } }>) => {
+self.onmessage = async (event: MessageEvent<{ type: string; payload: { buffer: ArrayBuffer; settings: PdfSettings; fileId: string } }>) => {
   const { type, payload } = event.data;
   if (type !== 'process') return;
 
   try {
     const pdfBytes = await processDocument(payload.buffer, payload.settings);
-    self.postMessage({ type: 'success', payload: { pdfBytes: pdfBytes.buffer } }, [pdfBytes.buffer] as any);
+    self.postMessage({ type: 'success', payload: { pdfBytes: pdfBytes.buffer, fileId: payload.fileId } }, [pdfBytes.buffer] as any);
   } catch (err: any) {
-    self.postMessage({ type: 'error', payload: { message: err?.message ?? 'Unknown error' } });
+    self.postMessage({ type: 'error', payload: { message: err?.message ?? 'Unknown error', fileId: payload.fileId } });
   }
 };
