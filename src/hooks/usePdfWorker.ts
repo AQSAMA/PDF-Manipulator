@@ -2,10 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type PdfStatus = 'idle' | 'processing' | 'ready' | 'error';
 
+export type PaperSize = 'auto' | 'letter' | 'legal' | 'a4' | 'a3' | 'tabloid';
+
 export interface PdfSettings {
     pagesPerSheet: number;
     rotation: number;
     borderWidth: number;
+    paperSize: PaperSize;
 }
 
 interface WorkerSuccessPayload {

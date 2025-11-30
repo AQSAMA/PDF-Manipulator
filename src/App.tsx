@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS: PdfSettings = {
     pagesPerSheet: 1,
     rotation: 0,
     borderWidth: 0,
+    paperSize: 'auto',
 };
 
 const App: React.FC = () => {
@@ -82,8 +83,10 @@ const App: React.FC = () => {
                     <SheetSettings
                         pagesPerSheet={settings.pagesPerSheet}
                         rotation={settings.rotation}
+                        paperSize={settings.paperSize}
                         onPagesPerSheetChange={(value) => setSettings((prev) => ({ ...prev, pagesPerSheet: value }))}
                         onRotationChange={(value) => setSettings((prev) => ({ ...prev, rotation: value }))}
+                        onPaperSizeChange={(value) => setSettings((prev) => ({ ...prev, paperSize: value }))}
                     />
 
                     <BorderControls
